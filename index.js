@@ -299,6 +299,35 @@ app.get("/leads/:id/comments", async (req, res) => {
 });
 
 //REPORTING APIs
+//CLOSE LAST WEEK API
+app.get("/report/last-week", async (req, res) => {
+  const leads = await Lead.find({ status: "Closed" });
+  try {
+    const today = new Date();
+    const lastWeek = today.setDate(today.getDate() - 7);
+
+    const lastWeekLead = leads.filter(
+      (lead) => new Date(lead.createdAt) >= lastWeek
+    );
+
+    res.status(200).json(lastWeekLead);
+  } catch (error) {
+    res.status(404).json({ error: `${error} while getting last week leads` });
+  }
+});
+
+//TOTAL LEADS IN PIPELINE API
+app.get("/report/pipeline", async (req, res) => {
+  const leads = await Lead.find();
+  try {
+    const pipelineLead = leads.filter((lead) => !(lead.status === "Closed"));
+    // if (leads.filter((lead) => lead.))
+    const count = pipelineLead.length;
+    res.status(200).json({ totalLeadsInPipeline: count });
+  } catch (error) {
+    res.status(404).json({ error: `${error} while getting pipleline leads` });
+  }
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
