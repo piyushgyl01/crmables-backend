@@ -260,6 +260,43 @@ app.get("/salesAgent", async (req, res) => {
 });
 
 //COMMENTS APIs
+//POSTING COMMENT API
+app.post("/leads/:id/comments", async (req, res) => {
+  try {
+    const leadId = req.params.id;
+    const { author, commentText } = req.body;
+    if (!author || !commentText) {
+      return res.status(400).json({
+        error: "Both author and commentText are required",
+      });
+    }
+
+    const existingLead = await Lead.findById(leadId);
+    if (!existingLead) {
+      return res.status(404).json({
+        error: `Lead with ID ${leadId} not found`,
+      });
+    }
+
+    const newComment = new Comment({ lead: leadId, author, commentText });
+
+    await newComment.save();
+    res.status(201).json(newComment);
+  } catch (error) {
+    res.status(404).json({ error: `${error} while adding a comment` });
+  }
+});
+
+//READING COMMENT API
+app.get("/leads/:id/comments", async (req, res) => {
+  try {
+    const leadId = req.params.id;
+    const comments = await Comment.find({ lead: leadId }).populate("author");
+    res.status(200).json(comments);
+  } catch (error) {
+    res.status(404).json({ error: `${error} while adding a comment` });
+  }
+});
 
 //REPORTING APIs
 
