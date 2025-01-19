@@ -28,7 +28,6 @@ app.get("/", (req, res) => {
 });
 
 //LEAD CRUD APIs
-
 //CREATE API
 app.post("/leads", async (req, res) => {
   try {
@@ -205,20 +204,24 @@ app.put("/leads/:id", async (req, res) => {
 });
 
 //DELETE API
+app.delete("/leads/:id", async (req, res) => {
+  const leadId = req.params.id;
+  try {
+    const deletedLead = await Lead.findByIdAndDelete(leadId);
+
+    if (!deletedLead) {
+      res.status(404).json({ error: `Lead with ${leadId} not found` });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Lead deleted successfully", lead: deletedLead });
+  } catch (error) {
+    res.status(404).json({ error: `${error} while deleting a lead` });
+  }
+});
 
 //SALES AGENT CREATE AND READ APIs
-
-// async function saveSalesAgentsData(data) {
-//   const savedData = await SalesAgent.insertMany(data);
-//   console.log("Yeah saved these sales agents in the DB", salesAgents)
-//   try {
-//   } catch (error) {
-//     console.log("You suck lmao see this error while saving to DB lol", error);
-//   }
-// }
-
-// saveSalesAgentsData()
-
 //CREATE API
 app.post("/salesAgent", async (req, res) => {
   try {
