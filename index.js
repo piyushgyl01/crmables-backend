@@ -121,6 +121,88 @@ app.get("/leads", async (req, res) => {
 });
 
 //UPDATE API
+app.put("/leads/:id", async (req, res) => {
+  try {
+    const leadId = req.params.id;
+    const { name, source, salesAgent, status, tags, timeToClose, priority } =
+      req.body;
+
+    const existingSalesAgent = await SalesAgent.findById(salesAgent);
+    if (!existingSalesAgent) {
+      res
+        .status(404)
+        .json({ error: `Sales agent with ID ${salesAgent} not found` });
+    }
+
+    if (!name || !source || !status || !timeToClose || !priority) {
+      res.status(404).json({ error: "Some field is missing" });
+    }
+
+    if (typeof name !== "string") {
+      res.status(400).json({ error: "Name must be a string" });
+    }
+
+    const validSources = [
+      "Website",
+      "Referral",
+      "Cold Call",
+      "Advertisement",
+      "Email",
+      "Other",
+    ];
+    if (!validSources.includes(source)) {
+      res
+        .status(400)
+        .json({ error: `Source must be one of: ${validSources.join(", ")}` });
+    }
+
+    const validStatuses = [
+      "New",
+      "Contacted",
+      "Qualified",
+      "Proposal Sent",
+      "Closed",
+    ];
+    if (!validStatuses.includes(status)) {
+      res
+        .status(400)
+        .json({ error: `Status must be one of: ${validStatuses.join(", ")}` });
+    }
+
+    const validPriorities = ["High", "Medium", "Low"];
+    if (!validPriorities.includes(priority)) {
+      res.status(400).json({
+        error: `Priority must be one of: ${validPriorities.join(", ")}`,
+      });
+    }
+
+    if (!Number.isInteger(timeToClose) || timeToClose < 0) {
+      res
+        .status(404)
+        .json({ error: "Time to close must be a positive integer" });
+    }
+
+    if (!Array.isArray(tags)) {
+      res.status(404).json({ error: "Tags must be an array" });
+    }
+
+    const updatedLeadData = await Lead.findByIdAndUpdate(
+      leadId,
+      { name, source, salesAgent, status, tags, timeToClose, priority },
+      { new: true }
+    );
+
+    if (!updatedLeadData) {
+      res.status(404).json({ error: "Lead not found" });
+    }
+
+    res.status(201).json(updatedLeadData);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: `Error while updating the lead's details ${error}` });
+  }
+});
 
 //DELETE API
 
