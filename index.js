@@ -119,6 +119,16 @@ app.get("/leads", async (req, res) => {
   }
 });
 
+app.get("/lead/:id", async (req, res) => {
+  try {
+    const lead = await Lead.findById(req.params.id)
+    res.json(lead)
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+
+  }
+})
+
 //UPDATE API
 app.put("/leads/:id", async (req, res) => {
   try {
